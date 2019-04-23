@@ -4,11 +4,8 @@
 # python standard packages
 import hashlib
 import json
-import os
-import pip
 import pkg_resources
 import sys
-import time
 
 
 # pypi packages
@@ -17,9 +14,9 @@ import keras.callbacks
 from keras.utils.generic_utils import serialize_keras_object
 try:
     import matplotlib.pyplot as plt
-    has_pyplot = True
+    HAS_PYPLOT = True
 except ImportError:
-    has_pyplot = False
+    HAS_PYPLOT = False
 import numpy as np
 
 
@@ -28,23 +25,23 @@ class MattPlotCallback(keras.callbacks.Callback):
 
     DO NOT USE if you do not have matplotlib package installed.
     """
-    def __init__(self, plot_loss=True, plot_acc=True):
-        self.plot_loss = plot_loss
-        self.plot_acc = plot_acc
+    def __init__(self, do_plot_loss=True, do_plot_acc=True):
+        self.do_plot_loss = do_plot_loss
+        self.do_plot_acc = do_plot_acc
         self.legend_printed_acc = False
         self.legend_printed_loss = False
-    def on_train_begin(self, logs={}):
-        if self.plot_loss or self.plot_acc:
+    def on_train_begin(self, logs=None):
+        if self.do_plot_loss or self.do_plot_acc:
             plt.ion()
         # Accuracy fig
-        if self.plot_acc:
+        if self.do_plot_acc:
             self.fig_acc, self.ax_acc = plt.subplots()
             self.ax_acc.set_title("Accuracy During Training")
             self.ax_acc.set_xlabel("Epoch")
             self.ax_acc.set_ylabel("Accuracy (%)")
             self.ax_acc.grid()
         # Loss fig
-        if self.plot_loss:
+        if self.do_plot_loss:
             self.fig_loss, self.ax_loss = plt.subplots()
             self.ax_loss.set_title("Loss During Training")
             self.ax_loss.set_xlabel("Epoch")
@@ -57,9 +54,11 @@ class MattPlotCallback(keras.callbacks.Callback):
         self.loss = []
         self.val_loss = []
 
-    def on_epoch_end(self, epoch, logs={}):
+    def on_epoch_end(self, epoch, logs=None):
+        if logs is None:
+            logs = {}
         self.epochs.append(epoch)
-        if self.plot_acc:
+        if self.do_plot_acc:
             if 'acc' in logs:
                 self.acc.append(logs['acc']*100)
             if 'val_acc' in logs:
@@ -73,7 +72,7 @@ class MattPlotCallback(keras.callbacks.Callback):
                     )
             if not self.legend_printed_acc:
                 self.legend_printed_acc = True
-        if self.plot_loss:
+        if self.do_plot_loss:
             if 'loss' in logs:
                 self.loss.append(logs['loss'])
             if 'val_loss' in logs:
@@ -87,7 +86,7 @@ class MattPlotCallback(keras.callbacks.Callback):
                     )
             if not self.legend_printed_loss:
                 self.legend_printed_loss = True
-        if self.plot_loss or self.plot_acc:
+        if self.do_plot_loss or self.do_plot_acc:
             plt.pause(0.001)
 
 
@@ -150,10 +149,10 @@ def save_summary_to_file(model, model_summary_file, history=None):
                         file=summary_fh
                         )
 
-def plot_vs_epoch(ax, epochs, train=[], val=[], do_legend=True):
-    if train:
+def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
+    if train is not None:
         ax.plot(epochs, train, 'ro-', label='training')
-    if val:
+    if val is not None:
         ax.plot(epochs, val, 'bo-', label='validation')
     if do_legend:
         ax.legend()
