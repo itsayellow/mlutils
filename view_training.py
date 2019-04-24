@@ -75,9 +75,9 @@ def plot_acc(data_dict):
 
 def pyplot_quick_dirty(train_data):
     epochs = range(1, len(train_data['loss'])+1)
-    plt.figure(num=1, figsize=(5,10))
+    plt.figure(num=1, figsize=(10,5))
 
-    plt.subplot(211)
+    plt.subplot(121)
     plt.plot(epochs, train_data['loss'], label='loss')
     plt.plot(epochs, train_data['val_loss'], label='val_loss')
     plt.xlabel('Epoch')
@@ -85,7 +85,7 @@ def pyplot_quick_dirty(train_data):
     plt.legend()
     plt.grid()
 
-    plt.subplot(212)
+    plt.subplot(122)
     plt.plot(epochs, 100*np.array(train_data['acc']), label='acc')
     plt.plot(epochs, 100*np.array(train_data['val_acc']), label='val_acc')
     plt.xlabel('Epoch')
