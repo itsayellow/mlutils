@@ -51,15 +51,28 @@ def process_command_line(argv):
 
 def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
     if train is not None:
-        ax.plot(epochs, train, 'ro-', label='training')
+        ax.plot(epochs, train, '.-', label='training')
     if val is not None:
-        ax.plot(epochs, val, 'bo-', label='validation')
+        ax.plot(epochs, val, '.-', label='validation')
     if do_legend:
         ax.legend()
 
 
-def plot_acc(data_dict):
-    fig, ax = plt.subplots()
+def plot_loss(ax, data_dict):
+    # ax belongs to fig
+    ax.set_title("Loss During Training")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Loss")
+    plot_vs_epoch(
+            ax,
+            range(1, len(data_dict['acc'])+1),
+            data_dict.get('loss', []),
+            data_dict.get('val_loss', [])
+            )
+    ax.grid()
+
+
+def plot_acc(ax, data_dict):
     # ax belongs to fig
     ax.set_title("Accuracy During Training")
     ax.set_xlabel("Epoch")
@@ -67,10 +80,10 @@ def plot_acc(data_dict):
     plot_vs_epoch(
             ax,
             range(1, len(data_dict['acc'])+1),
-            data_dict.get('acc', []),
-            data_dict.get('val_acc', [])
+            100*np.array(data_dict.get('acc', [])),
+            100*np.array(data_dict.get('val_acc', []))
             )
-    return fig
+    ax.grid()
 
 
 def pyplot_quick_dirty(train_data):
@@ -93,7 +106,20 @@ def pyplot_quick_dirty(train_data):
     plt.legend()
     plt.grid()
 
-    plt.show()
+
+def plot_loss_acc(fig, train_data):
+    plt.subplots_adjust(
+            left=None,
+            bottom=None,
+            right=None,
+            top=None,
+            wspace=None,
+            hspace=None,
+            )
+    ax1 = fig.add_subplot(121)
+    plot_loss(ax1, train_data)
+    ax2 = fig.add_subplot(122)
+    plot_acc(ax2, train_data)
 
 def main(argv=None):
     args = process_command_line(argv)
@@ -104,7 +130,10 @@ def main(argv=None):
         train_data = json.load(train_data_fh)
 
     # actually plot
-    pyplot_quick_dirty(train_data)
+    fig = plt.figure(num=1, figsize=(10,5))
+    plot_loss_acc(fig, train_data)
+    fig.savefig(data_dir.name + ".png", bbox_inches="tight")
+    plt.show()
 
     return 0
 
