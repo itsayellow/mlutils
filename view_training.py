@@ -58,30 +58,30 @@ def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
         ax.legend()
 
 
-def plot_loss(ax, data_dict):
+def plot_loss(ax, epochs, data_dict):
     # ax belongs to fig
     ax.set_title("Loss During Training")
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Loss")
     plot_vs_epoch(
             ax,
-            range(1, len(data_dict['acc'])+1),
+            epochs,
             data_dict.get('loss', []),
             data_dict.get('val_loss', [])
             )
     ax.grid()
 
 
-def plot_acc(ax, data_dict):
+def plot_acc(ax, epochs, data_dict):
     # ax belongs to fig
     ax.set_title("Accuracy During Training")
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Accuracy (%)")
     plot_vs_epoch(
             ax,
-            range(1, len(data_dict['acc'])+1),
-            100*np.array(data_dict.get('acc', [])),
-            100*np.array(data_dict.get('val_acc', []))
+            epochs,
+            data_dict.get('acc_perc', []),
+            data_dict.get('val_acc_perc', [])
             )
     ax.grid()
 
@@ -107,19 +107,21 @@ def pyplot_quick_dirty(train_data):
     plt.grid()
 
 
-def plot_loss_acc(fig, train_data):
+def plot_loss_acc(fig, epochs, train_data):
     plt.subplots_adjust(
-            left=None,
+            left=0.08,
             bottom=None,
-            right=None,
+            right=0.92,
             top=None,
             wspace=None,
             hspace=None,
             )
     ax1 = fig.add_subplot(121)
-    plot_loss(ax1, train_data)
+    plot_loss(ax1, epochs, train_data)
     ax2 = fig.add_subplot(122)
-    plot_acc(ax2, train_data)
+    plot_acc(ax2, epochs, train_data)
+    return(ax1, ax2)
+
 
 def main(argv=None):
     args = process_command_line(argv)
@@ -128,10 +130,38 @@ def main(argv=None):
     train_data_path = data_dir / 'train_history.json'
     with train_data_path.open("r") as train_data_fh:
         train_data = json.load(train_data_fh)
+    train_data['val_acc_perc'] = 100*np.array(train_data['val_acc'])
+    train_data['acc_perc'] = 100*np.array(train_data['acc'])
+
+    # find best val_loss
+    epochs = range(1, len(train_data['acc'])+1)
+    best_i = np.argmin(np.array(train_data['val_loss']))
+    best_epoch = best_i + 1
+    best_val_loss = train_data['val_loss'][best_i]
+    best_val_acc_perc = train_data['val_acc_perc'][best_i]
+    epoch_scale = max(epochs) - min(epochs)
+    loss_scale = max(train_data['val_loss']) - min(train_data['val_loss'])
+    acc_perc_scale = max(train_data['val_acc_perc']) - min(train_data['val_acc_perc'])
 
     # actually plot
     fig = plt.figure(num=1, figsize=(10,5))
-    plot_loss_acc(fig, train_data)
+    (ax1, ax2) = plot_loss_acc(fig, epochs, train_data)
+
+    # use annotate instead of arrow because so much easier to get good results
+    ax1.annotate('best=%.1f'%best_val_loss,
+            (best_epoch, best_val_loss),
+            (best_epoch, best_val_loss + .2*loss_scale),
+            arrowprops=dict(arrowstyle="->"),
+            horizontalalignment='center'
+            )
+    ax2.annotate('best=%.1f'%best_val_acc_perc,
+            (best_epoch, best_val_acc_perc),
+            (best_epoch, best_val_acc_perc - .2*acc_perc_scale),
+            arrowprops=dict(arrowstyle="->"),
+            horizontalalignment='center'
+            )
+
+    # save and display to computer
     fig.savefig(data_dir.name + ".png", bbox_inches="tight")
     plt.show()
 
