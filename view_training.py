@@ -8,6 +8,12 @@ import json
 import pathlib
 import sys
 
+from contextlib import redirect_stderr
+import os
+with redirect_stderr(open(os.devnull, "w")):
+    from keras.models import load_model
+    from keras.utils import plot_model
+
 import matplotlib.pyplot as plt
 import numpy as np
 
