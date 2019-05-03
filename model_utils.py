@@ -105,7 +105,12 @@ def hash_model(model, hash_len=6):
     """
     # serialize model architecture to string, ensuring consistent key order
     #   by sorting keys
-    model_arch = json.dumps(model.get_config(), sort_keys=True)
+    model_config = model.get_config()
+    # remove name from each layer, because is arbitrary (don't use for hash)
+    for layer in model_config["layers"]:
+        layer['config'].pop('name')
+
+    model_arch = json.dumps(model_config, sort_keys=True)
     try:
         model_opt = serialize_keras_object(model.optimizer)['class_name']
     except AttributeError:
