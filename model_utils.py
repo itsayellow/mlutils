@@ -147,8 +147,6 @@ def hash_model(model, hash_len=6):
     #   by sorting keys
     # remove name from each layer, because is arbitrary (don't use for hash)
     # sort_keys is important for hashing consistency!
-    import pprint
-    pprint.pprint(get_model_full_config(model, remove_names=True))
     model_full_config_json = json.dumps(
             get_model_full_config(model, remove_names=True),
             sort_keys=True
