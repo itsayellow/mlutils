@@ -12,11 +12,6 @@ import sys
 import tensorflow as tf
 import keras.callbacks
 from keras.utils.generic_utils import serialize_keras_object
-try:
-    import matplotlib.pyplot as plt
-    HAS_PYPLOT = True
-except ImportError:
-    HAS_PYPLOT = False
 import numpy as np
 
 
@@ -25,11 +20,17 @@ class MattPlotCallback(keras.callbacks.Callback):
 
     DO NOT USE if you do not have matplotlib package installed.
     """
+
     def __init__(self, do_plot_loss=True, do_plot_acc=True):
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise Exception("matplotlib is not installed.")
         self.do_plot_loss = do_plot_loss
         self.do_plot_acc = do_plot_acc
         self.legend_printed_acc = False
         self.legend_printed_loss = False
+
     def on_train_begin(self, logs=None):
         if self.do_plot_loss or self.do_plot_acc:
             plt.ion()
@@ -90,10 +91,49 @@ class MattPlotCallback(keras.callbacks.Callback):
             plt.pause(0.001)
 
 
+def plot_acc(hist):
+    fig, ax = plt.subplots()
+    # ax belongs to fig
+    ax.set_title("Accuracy During Training")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Accuracy (%)")
+    plot_vs_epoch(
+            ax,
+            range(1, len(hist.history['loss'])+1),
+            hist.history.get('acc', []),
+            hist.history.get('val_acc', [])
+            )
+
+
+def get_model_full_config(model, remove_names=False):
+    """
+    """
+    # serialize model architecture to string, ensuring consistent key order
+    #   by sorting keys
+    model_config = model.get_config()
+    if remove_names:
+        # remove name from config and each layer, because name is arbitrary
+        #   (don't use for hash)
+        model_config.pop('name')
+        for layer in model_config["layers"]:
+            layer['config'].pop('name')
+
+    model_info = {}
+    model_info['config'] = model_config
+    model_info['loss'] = getattr(model, 'loss', "")
+    model_info['metrics'] = getattr(model, 'metrics', {})
+    model_info['optimizer'] = serialize_keras_object(
+            getattr(model, 'optimizer', {})
+            )
+    return model_info
+
+
 def hash_model(model, hash_len=6):
-    """Create a hash string based on model config
+    """Create a hash string based on model config, including compile options
 
     String is as unique as possible for length of hash_len.
+
+    Uncompiled vs. compiled model hash will change value.
 
     Arguments:
         model (keras.model.Model): keras model
@@ -105,21 +145,15 @@ def hash_model(model, hash_len=6):
     """
     # serialize model architecture to string, ensuring consistent key order
     #   by sorting keys
-    model_config = model.get_config()
     # remove name from each layer, because is arbitrary (don't use for hash)
-    for layer in model_config["layers"]:
-        layer['config'].pop('name')
-
-    model_arch = json.dumps(model_config, sort_keys=True)
-    try:
-        model_opt = serialize_keras_object(model.optimizer)['class_name']
-    except AttributeError:
-        model_opt = ""
-    model_loss = getattr(model, 'loss', "")
-    model_metrics = str(getattr(model, 'metrics', []))
-    model_hash = hashlib.md5(
-            (model_arch + model_opt + model_loss + model_metrics).encode('utf8')
+    # sort_keys is important for hashing consistency!
+    import pprint
+    pprint.pprint(get_model_full_config(model, remove_names=True))
+    model_full_config_json = json.dumps(
+            get_model_full_config(model, remove_names=True),
+            sort_keys=True
             )
+    model_hash = hashlib.md5(model_full_config_json.encode('utf8'))
     return model_hash.hexdigest()[:hash_len]
 
 
@@ -161,20 +195,6 @@ def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
         ax.plot(epochs, val, 'bo-', label='validation')
     if do_legend:
         ax.legend()
-
-
-def plot_acc(hist):
-    fig, ax = plt.subplots()
-    # ax belongs to fig
-    ax.set_title("Accuracy During Training")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("Accuracy (%)")
-    plot_vs_epoch(
-            ax,
-            range(1, len(hist.history['loss'])+1),
-            hist.history.get('acc', []),
-            hist.history.get('val_acc', [])
-            )
 
 
 def output_system_summary():
