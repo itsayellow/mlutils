@@ -113,23 +113,30 @@ def get_model_full_config(model, remove_names=False):
     #   by sorting keys
     model_config = model.get_config()
 
-    # DEBUG only:
-    #pprint.pprint(model_config)
-
     if remove_names:
-        # remove name from config and each layer, because name is arbitrary
-        #   (don't use for hash)
-        model_config.pop('name')
-        for layer in model_config["input_layers"]:
-            layer.pop(0)
-        for layer in model_config["output_layers"]:
-            layer.pop(0)
-        for layer in model_config["layers"]:
-            layer['config'].pop('name')
-            layer.pop('name')
+        # DEBUG only:
+        #pprint.pprint(model_config)
 
-    # DEBUG only:
-    #pprint.pprint(model_config)
+        # remove name from config and each layer, because name is arbitrary
+        #   (for hashing)
+        # this can be a bit brute-force, don't do this if you really need
+        #   the config
+        model_config.pop('name', None)
+        for layer in model_config["layers"]:
+            layer['config'].pop('name', None)
+            # only in non-Sequential Models
+            layer.pop('name', None)
+            # only in non-Sequential Models
+            layer.pop('inbound_nodes', None)
+        # only in non-Sequential Models
+        for layer in model_config.get("input_layers",[]):
+            layer.pop(0)
+        # only in non-Sequential Models
+        for layer in model_config.get("output_layers",[]):
+            layer.pop(0)
+
+        # DEBUG only:
+        #pprint.pprint(model_config)
 
     model_info = {}
     model_info['config'] = model_config
