@@ -149,7 +149,11 @@ def testing(model, data, model_out_dir, model_save_dir):
     with test_out_path.open("w") as test_out_fh:
         json.dump(test_out, test_out_fh)
 
+
+def summarize(model, model_name, model_out_dir):
     info_out = {}
+    info_out['model_name'] = model_name
+    info_out['model_info'] = model_utils.get_model_full_config(model)
     info_out['datetime_utc'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     info_out_path = model_out_dir / 'info.json'
     with info_out_path.open("w") as info_out_fh:
