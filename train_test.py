@@ -3,7 +3,7 @@
 Generic training/testing functions to be used by all experiments
 """
 
-
+import datetime
 import json
 
 from keras.models import load_model
@@ -148,3 +148,9 @@ def testing(model, data, model_out_dir, model_save_dir):
     test_out_path = model_out_dir / 'test.json'
     with test_out_path.open("w") as test_out_fh:
         json.dump(test_out, test_out_fh)
+
+    info_out = {}
+    info_out['datetime_utc'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    info_out_path = model_out_dir / 'info.json'
+    with info_out_path.open("w") as info_out_fh:
+        json.dump(info_out, info_out_fh)
