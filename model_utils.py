@@ -5,7 +5,7 @@
 import hashlib
 import json
 import pkg_resources
-import pprint
+#import pprint
 import sys
 
 
@@ -114,7 +114,7 @@ def get_model_full_config(model, remove_names=False):
     model_config = model.get_config()
 
     # DEBUG only:
-    pprint.pprint(model_config)
+    #pprint.pprint(model_config)
 
     if remove_names:
         # remove name from config and each layer, because name is arbitrary
@@ -129,7 +129,7 @@ def get_model_full_config(model, remove_names=False):
             layer.pop('name')
 
     # DEBUG only:
-    pprint.pprint(model_config)
+    #pprint.pprint(model_config)
 
     model_info = {}
     model_info['config'] = model_config
