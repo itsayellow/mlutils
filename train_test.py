@@ -16,7 +16,7 @@ import model_utils
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
-        model_out_dir, cloud=False, realtime_plot=False, resume=None):
+        model_out_dir, train_verbose=1, realtime_plot=False, resume=None):
     """
     Args:
         model (keras.model): model
@@ -26,7 +26,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
         val_x (numpy.array): data['valid']
         val_y (numpy.array): data['valid_targets'],
         model_out_dir (pathlib.Path): model_out_dir,
-        cloud (bool): args.cloud,
+        train_verbose (int): keras verbose for training (2 for cloud)
         realtime_plot (bool): use_pyplot
         resume (None or dict):
 
@@ -76,8 +76,6 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     mytimer = tictoc.Timer()
     mytimer.start()
 
-    # terminal real-time formatting doesn't work so well over the cloud
-    verbose = 1 if not cloud else 2
     # Train the model
     try:
         hist = model.fit(
@@ -86,7 +84,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
                 epochs=epochs,
                 batch_size=20,
                 callbacks=callbacks,
-                verbose=verbose,
+                verbose=train_verbose,
                 initial_epoch=initial_epoch
                 )
     except KeyboardInterrupt:
