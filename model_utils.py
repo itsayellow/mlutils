@@ -145,6 +145,8 @@ def get_model_full_config(model, remove_names=False):
     model_info['optimizer'] = serialize_keras_object(
             getattr(model, 'optimizer', {})
             )
+    #model_opt_name = my_model.optimizer.__class__.__module__ + \
+    #        "." + my_model.optimizer.__class__.__name__
 
     return model_info
 
