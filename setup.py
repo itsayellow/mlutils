@@ -1,5 +1,14 @@
-from distutils.core import setup
-setup(name='dog_common',
-      version='0.1',
-      py_modules=['dog_modules', 'model_utils'],
-      )
+from setuptools import setup, find_packages
+
+setup(
+        name='mlutils',
+        version='0.1',
+        description='Utilities for training and using Machine Learning models.',
+        author='Matthew A. Clapp',
+        author_email='itsayellow+dev@gmail.com',
+        packages=[
+            'mlutils'
+            ],
+        install_requires=[
+            ],
+        )
