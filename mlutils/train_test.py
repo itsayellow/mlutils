@@ -16,7 +16,7 @@ import mlutils.model_utils
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
-        model_out_dir, train_verbose=1, realtime_plot=False, resume=None):
+        model_out_dir, train_verbose=1, patience=15, realtime_plot=False, resume=None):
     """
     Args:
         model (keras.model): model
@@ -27,6 +27,8 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
         val_y (numpy.array): data['valid_targets'],
         model_out_dir (pathlib.Path): model_out_dir,
         train_verbose (int): keras verbose for training (2 for cloud)
+        patience (int): how many epochs to tolerate no improvement before
+            stopping early
         realtime_plot (bool): use_pyplot
         resume (None or dict):
 
@@ -65,7 +67,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
             )
     early_stopping = EarlyStopping(
             monitor='val_loss',
-            patience=15
+            patience=patience
             )
     callbacks = [checkpointer, checkpointer2, early_stopping]
     if realtime_plot:
