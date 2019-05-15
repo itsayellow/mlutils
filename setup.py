@@ -14,5 +14,6 @@ setup(
             'keras',
             'numpy',
             'matplotlib',
+            'tictoc @ git+https://github.com/itsayellow/tictoc@master',
             ],
         )
