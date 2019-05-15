@@ -12,7 +12,7 @@ import numpy as np
 
 import tictoc
 
-import model_utils
+import mlutils.model_utils
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
@@ -52,7 +52,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     # create master data dir and saved_models dir under it
     model_save_dir.mkdir(parents=True, exist_ok=True)
     # save summary to file first (in case we crash)
-    model_utils.save_summary_to_file(model, model_summary_file)
+    mlutils.model_utils.save_summary_to_file(model, model_summary_file)
 
     # Instantiate callbacks
     checkpointer = ModelCheckpoint(
@@ -69,7 +69,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
             )
     callbacks = [checkpointer, checkpointer2, early_stopping]
     if realtime_plot:
-        mattplot_callback = model_utils.MattPlotCallback()
+        mattplot_callback = mlutils.model_utils.MattPlotCallback()
         callbacks.append(mattplot_callback)
 
     hist = None
@@ -109,7 +109,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
         plt.show()
 
     # save summary to file with history this time
-    model_utils.save_summary_to_file(
+    mlutils.model_utils.save_summary_to_file(
             model, model_summary_file, history=hist.history
             )
 
@@ -151,7 +151,7 @@ def testing(model, data, model_out_dir, model_save_dir):
 def summarize(model, model_name, model_out_dir):
     info_out = {}
     info_out['model_name'] = model_name
-    info_out['model_info'] = model_utils.get_model_full_config(model)
+    info_out['model_info'] = mlutils.model_utils.get_model_full_config(model)
     info_out['datetime_utc'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     info_out_path = model_out_dir / 'info.json'
     with info_out_path.open("w") as info_out_fh:
