@@ -16,6 +16,9 @@ from keras.utils.generic_utils import serialize_keras_object
 import numpy as np
 
 
+# TODO 20090515: this currently does not work properly.  Need to get imports
+#   working correctly so if we're not using it we do not import matplotlib
+#   but so that it actually does work if we are using it
 class MattPlotCallback(keras.callbacks.Callback):
     """Plot as training is ongoing
 
