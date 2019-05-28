@@ -24,4 +24,4 @@ Installation
 
     .. code:: bash
 
-        pip install -e https://github.com/itsayellow/mlutils
+        pipenv install -e https://github.com/itsayellow/mlutils
