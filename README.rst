@@ -12,9 +12,16 @@ Installation
 
         pip install -e git/mlutils/
 
+    .. code:: bash
+
+        pip install -e https://github.com/itsayellow/mlutils
+
 * pipenv
 
     .. code:: bash
 
         pipenv install -e git/mlutils/
 
+    .. code:: bash
+
+        pip install -e https://github.com/itsayellow/mlutils
