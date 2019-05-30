@@ -130,17 +130,18 @@ def testing(model, data, model_out_dir, model_save_dir):
     # Load the model with the best validation loss
     model.load_weights(model_save_dir / 'weights.best.hdf5')
 
-    # get index of predicted dog breed for each image in test set
-    dog_breed_predictions = [
-            np.argmax(model.predict(np.expand_dims(feature, axis=0)))
-            for feature in data['test']
-            ]
+    # get predictions
+    predictions = model.predict(data['test'])
 
+    print("predictions.shape="+str(predictions.shape))
     # report test accuracy
-    test_num_correct = np.sum(
-            np.array(dog_breed_predictions) == np.argmax(data['test_targets'], axis=1)
-            )
-    test_accuracy = test_num_correct/len(dog_breed_predictions)
+    if predictions.ndim > 1:
+        class_predictions = np.argmax(predictions, axis=1)
+        class_actual = np.argmax(data['test_targets'], axis=1)
+        test_num_correct = np.sum(class_predictions == class_actual)
+    else:
+        test_num_correct = np.sum(predictions == data['test_targets'])
+    test_accuracy = test_num_correct/len(class_predictions)
     test_accuracy_perc = 100 * test_accuracy
     print('Test accuracy: %.4f%%' % test_accuracy_perc)
 
