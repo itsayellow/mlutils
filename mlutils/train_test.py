@@ -134,8 +134,8 @@ def testing(model, data, model_out_dir, model_save_dir):
     predictions = model.predict(data['test'])
 
     # DEBUG
-    print("predictions.shape="+str(predictions.shape))
-    print("predictions[:20, 0]="+str(predictions[:20, 0]))
+    #print("predictions.shape="+str(predictions.shape))
+    #print("predictions[:20, 0]="+str(predictions[:20, 0]))
 
     # report test accuracy
     if predictions.shape[-1] > 1:
@@ -147,7 +147,7 @@ def testing(model, data, model_out_dir, model_save_dir):
         # binary output
         test_num_correct = np.sum((predictions > 0.5) == data['test_targets'])
 
-    test_accuracy = test_num_correct/len(class_predictions)
+    test_accuracy = test_num_correct/predictions.shape[0]
     test_accuracy_perc = 100 * test_accuracy
     print('Test accuracy: %.4f%%' % test_accuracy_perc)
 
