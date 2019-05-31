@@ -133,14 +133,20 @@ def testing(model, data, model_out_dir, model_save_dir):
     # get predictions
     predictions = model.predict(data['test'])
 
+    # DEBUG
     print("predictions.shape="+str(predictions.shape))
+    print("predictions[:20, 0]="+str(predictions[:20, 0]))
+
     # report test accuracy
-    if predictions.ndim > 1:
+    if predictions.shape[-1] > 1:
+        # multiple-class output
         class_predictions = np.argmax(predictions, axis=1)
         class_actual = np.argmax(data['test_targets'], axis=1)
         test_num_correct = np.sum(class_predictions == class_actual)
     else:
-        test_num_correct = np.sum(predictions == data['test_targets'])
+        # binary output
+        test_num_correct = np.sum((predictions > 0.5) == data['test_targets'])
+
     test_accuracy = test_num_correct/len(class_predictions)
     test_accuracy_perc = 100 * test_accuracy
     print('Test accuracy: %.4f%%' % test_accuracy_perc)
