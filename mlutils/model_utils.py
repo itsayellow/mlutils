@@ -11,12 +11,9 @@ import sys
 
 # pypi packages
 try:
-    import tensorflow-gpu as tf
-except ImportError:
-    try:
-        import tensorflow as tf
-    except:
-        tf = None
+    import tensorflow as tf
+except:
+    tf = None
 import keras.callbacks
 from keras.utils.generic_utils import serialize_keras_object
 import numpy as np
