@@ -10,7 +10,7 @@ setup(
             'mlutils'
             ],
         install_requires=[
-            'tensorflow',
+            #'tensorflow',
             'keras',
             'numpy',
             'matplotlib',

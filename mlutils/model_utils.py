@@ -10,7 +10,13 @@ import sys
 
 
 # pypi packages
-import tensorflow as tf
+try:
+    import tensorflow-gpu as tf
+except ImportError:
+    try:
+        import tensorflow as tf
+    except:
+        tf = None
 import keras.callbacks
 from keras.utils.generic_utils import serialize_keras_object
 import numpy as np
@@ -223,7 +229,8 @@ def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
 
 def output_system_summary():
     print("Python version: " + sys.version)
-    print("Tensorflow version " + tf.__version__)
+    if tf is not None:
+        print("Tensorflow version " + tf.__version__)
 
     print("Installed packages:")
     installed_packages = pkg_resources.working_set
