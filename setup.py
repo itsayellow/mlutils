@@ -16,4 +16,5 @@ setup(
             'matplotlib',
             'tictoc @ git+https://github.com/itsayellow/tictoc@master',
             ],
+        python_requires='>=3',
         )
