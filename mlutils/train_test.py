@@ -7,7 +7,7 @@ import datetime
 import json
 
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 import numpy as np
 
 import tictoc
@@ -69,7 +69,18 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
             monitor='val_loss',
             patience=patience
             )
-    callbacks = [checkpointer, checkpointer2, early_stopping]
+    tensorboard_log_dir = model_out_dir / 'tensorboard'
+    tensorboard_log_dir.mkdir(parents=True, exist_ok=True)
+    tensorboard_callback = TensorBoard(
+            log_dir = str(tensorboard_log_dir),
+            histogram_freq=20,
+            batch_size=32,
+            write_graph=True,
+            write_grads=False,
+            write_images=False,
+            update_freq='epoch'
+            )
+    callbacks = [checkpointer, checkpointer2, early_stopping, tensorboard_callback]
     if realtime_plot:
         mattplot_callback = mlutils.model_utils.MattPlotCallback()
         callbacks.append(mattplot_callback)
