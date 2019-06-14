@@ -16,7 +16,8 @@ import mlutils.model_utils
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
-        model_out_dir, train_verbose=1, patience=15, realtime_plot=False, resume=None):
+        model_out_dir, train_verbose=1, patience=15, batch_size=20,
+        realtime_plot=False, resume=None):
     """
     Args:
         model (keras.model): model
@@ -95,7 +96,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
                 train_x, train_y,
                 validation_data=(val_x, val_y),
                 epochs=epochs,
-                batch_size=20,
+                batch_size=batch_size,
                 callbacks=callbacks,
                 verbose=train_verbose,
                 initial_epoch=initial_epoch
