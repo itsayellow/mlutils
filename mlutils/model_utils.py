@@ -2,9 +2,11 @@
 
 
 # python standard packages
+import datetime
 import hashlib
 import json
 import pkg_resources
+import re
 #import pprint
 import sys
 
@@ -155,6 +157,13 @@ def get_model_full_config(model, remove_names=False):
     #        "." + my_model.optimizer.__class__.__name__
 
     return model_info
+
+
+def get_model_data_subdir(out_dir, model_name):
+    model_name_nohash = re.sub(r"_[0-9a-f]+$", "", model_name)
+    datetime_str = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    model_out_dir = out_dir / (model_name_nohash + "_" + datetime_str)
+    return model_out_dir
 
 
 def hash_model(model, hash_len=6):
