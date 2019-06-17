@@ -3,6 +3,7 @@
 
 # python standard packages
 import datetime
+import functools
 import hashlib
 import json
 import pkg_resources
