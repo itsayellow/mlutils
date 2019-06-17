@@ -130,12 +130,13 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     return model_save_dir
 
 
-def testing(model, data, model_out_dir, model_save_dir):
+def testing(model, test_x, test_y, model_out_dir, model_save_dir):
     """Testing of experiment
 
     Args:
         model (keras.model):
-        data (dict):
+        test_x (numpy.array):
+        test_y (numpy.array):
         model_out_dir (pathlib.Path):
         model_save_dir (pathlib.Path):
     """
@@ -143,7 +144,7 @@ def testing(model, data, model_out_dir, model_save_dir):
     model.load_weights(model_save_dir / 'weights.best.hdf5')
 
     # get predictions
-    predictions = model.predict(data['test'])
+    predictions = model.predict(test_x)
 
     # DEBUG
     #print("predictions.shape="+str(predictions.shape))
@@ -153,11 +154,11 @@ def testing(model, data, model_out_dir, model_save_dir):
     if predictions.shape[-1] > 1:
         # multiple-class output
         class_predictions = np.argmax(predictions, axis=1)
-        class_actual = np.argmax(data['test_targets'], axis=1)
+        class_actual = np.argmax(test_y, axis=1)
         test_num_correct = np.sum(class_predictions == class_actual)
     else:
         # binary output
-        test_num_correct = np.sum((predictions > 0.5) == data['test_targets'])
+        test_num_correct = np.sum((predictions > 0.5) == test_y)
 
     test_accuracy = test_num_correct/predictions.shape[0]
     test_accuracy_perc = 100 * test_accuracy
