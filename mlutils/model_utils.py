@@ -249,3 +249,17 @@ def output_system_summary():
     #for arg in sys.argv:
     #    print("    " + arg)
     #print("")
+
+
+def return_also_modelname(func):
+    """Function decorator to automatically return model name based on
+    function name and hash of model
+
+    Wrapped function returns (existing_return, model_name)
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        model = func(*args, **kwargs)
+        model_name = func.__name__ + '_' + hash_model(model, 6)
+        return (model, model_name)
+    return wrapper
