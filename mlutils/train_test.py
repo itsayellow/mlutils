@@ -5,6 +5,7 @@ Generic training/testing functions to be used by all experiments
 
 import datetime
 import json
+import logging
 
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
@@ -13,6 +14,14 @@ import numpy as np
 import tictoc
 
 import mlutils.model_utils
+
+
+# logging stuff
+#   not necessary to make a handler since we will be child logger
+#   we use NullHandler so if no config at top level we won't default to printing
+#       to stderr
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(logging.NullHandler())
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
