@@ -29,6 +29,11 @@ import numpy as np
 #       to stderr
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
+def log_or_print(msg, use_logging):
+    if use_logging:
+        LOGGER.info(msg)
+    else:
+        print(msg)
 
 
 # TODO 20090515: this currently does not work properly.  Need to get imports
@@ -108,6 +113,72 @@ class MattPlotCallback(keras.callbacks.Callback):
                 self.legend_printed_loss = True
         if self.do_plot_loss or self.do_plot_acc:
             plt.pause(0.001)
+
+
+class ModelCheckpointLogging(keras.callbacks.ModelCheckpoint):
+    """Mod of standard ModelCheckpoint to print to log instead of stdout
+
+    See ../KerasMITLicense for license details concerning some code in this class
+    
+    Args:
+        All standard keras.callbacks.ModelCheckpoint arguments
+        logger (logging.Logger): keyword arg only.  logger to print messages
+            to instead of stdout
+    """
+    def __init__(self, *args, **kwargs):
+        self.logger = kwargs.pop('logger', None)
+        super().__init__(*args, **kwargs)
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+        self.epochs_since_last_save += 1
+        if self.epochs_since_last_save >= self.period:
+            self.epochs_since_last_save = 0
+            filepath = self.filepath.format(epoch=epoch + 1, **logs)
+            if self.save_best_only:
+                current = logs.get(self.monitor)
+                if current is None:
+                    warnings.warn('Can save best model only with %s available, '
+                                  'skipping.' % (self.monitor), RuntimeWarning)
+                else:
+                    if self.monitor_op(current, self.best):
+                        if self.verbose > 0:
+                            msg = (
+                                    'Epoch %05d: %s improved from %0.5f to %0.5f,'
+                                    ' saving model to %s'
+                                    % (epoch + 1, self.monitor, self.best,
+                                        current, filepath)
+                                    )
+                            if self.logger is not None:
+                                self.logger.info(msg)
+                            else:
+                                print('\n' + msg)
+                        self.best = current
+                        if self.save_weights_only:
+                            self.model.save_weights(filepath, overwrite=True)
+                        else:
+                            self.model.save(filepath, overwrite=True)
+                    else:
+                        if self.verbose > 0:
+                            msg = (
+                                    'Epoch %05d: %s did not improve from %0.5f' %
+                                    (epoch + 1, self.monitor, self.best)
+                                    )
+                            if self.logger is not None:
+                                self.logger.info(msg)
+                            else:
+                                print('\n' + msg)
+            else:
+                if self.verbose > 0:
+                    msg = 'Epoch %05d: saving model to %s' % (epoch + 1, filepath)
+                    if self.logger is not None:
+                        self.logger.info(msg)
+                    else:
+                        print('\n' + msg)
+                if self.save_weights_only:
+                    self.model.save_weights(filepath, overwrite=True)
+                else:
+                    self.model.save(filepath, overwrite=True)
 
 
 def plot_acc(hist):
@@ -243,16 +314,16 @@ def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
         ax.legend()
 
 
-def output_system_summary():
-    print("Python version: " + sys.version)
+def output_system_summary(use_logging=False):
+    log_or_print("Python version: " + sys.version, use_logging)
     if tf is not None:
-        print("Tensorflow version " + tf.__version__)
+        log_or_print("Tensorflow version " + tf.__version__, use_logging)
 
-    print("Installed packages:")
+    log_or_print("Installed packages:", use_logging)
     installed_packages = pkg_resources.working_set
     inst_pkgs = {x.project_name:x.version for x in installed_packages}
     for inst_pkg in sorted(inst_pkgs):
-        print("    " + inst_pkg + "==" + inst_pkgs[inst_pkg])
+        log_or_print("    " + inst_pkg + "==" + inst_pkgs[inst_pkg], use_logging)
 
     #print("-"*78)
     #print("Arguments:")

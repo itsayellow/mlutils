@@ -6,6 +6,7 @@ Generic training/testing functions to be used by all experiments
 import datetime
 import json
 import logging
+import sys
 
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
@@ -22,11 +23,16 @@ import mlutils.model_utils
 #       to stderr
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
+def log_or_print(msg, use_logging):
+    if use_logging:
+        LOGGER.info(msg)
+    else:
+        print(msg)
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
         model_out_dir, train_verbose=1, patience=15, batch_size=20,
-        realtime_plot=False, resume=None):
+        realtime_plot=False, resume=None, use_logging=False):
     """
     Args:
         model (keras.model): model
@@ -41,6 +47,8 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
             stopping early
         realtime_plot (bool): use_pyplot
         resume (None or dict):
+        use_logging (bool): if True output messages to logging, if False output
+            to stdout
 
     Returns:
         model_save_dir: pathlib.Path
@@ -67,9 +75,10 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     mlutils.model_utils.save_summary_to_file(model, model_summary_file)
 
     # Instantiate callbacks
-    checkpointer = ModelCheckpoint(
+    checkpointer = mlutils.model_utils.ModelCheckpointLogging(
             filepath=str(model_save_dir / 'weights.best.hdf5'),
-            verbose=1, save_best_only=True
+            verbose=1, save_best_only=True,
+            logger=LOGGER if use_logging else None
             )
     checkpointer2 = ModelCheckpoint(
             filepath=str(model_save_dir / 'weights.epoch{epoch:04d}.hdf5'),
@@ -111,7 +120,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
                 initial_epoch=initial_epoch
                 )
     except KeyboardInterrupt:
-        print("Stopped prematurely via keyboard interrupt.")
+        print("Stopped prematurely via keyboard interrupt.", file=sys.stderr)
     mytimer.eltime_pr("training time: ")
 
     # save final model+weights
@@ -139,7 +148,8 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     return model_save_dir
 
 
-def testing(model, test_x, test_y, model_out_dir, model_save_dir):
+def testing(model, test_x, test_y, model_out_dir, model_save_dir,
+        use_logging=False):
     """Testing of experiment
 
     Args:
@@ -171,7 +181,7 @@ def testing(model, test_x, test_y, model_out_dir, model_save_dir):
 
     test_accuracy = test_num_correct/predictions.shape[0]
     test_accuracy_perc = 100 * test_accuracy
-    print('Test accuracy: %.4f%%' % test_accuracy_perc)
+    log_or_print('Test accuracy: %.4f%%' % test_accuracy_perc, use_logging)
 
     test_out = {'test_acc': test_accuracy, 'test_acc_perc': test_accuracy_perc}
     test_out_path = model_out_dir / 'test.json'
