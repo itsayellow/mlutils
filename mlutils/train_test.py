@@ -121,7 +121,10 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
                 )
     except KeyboardInterrupt:
         print("Stopped prematurely via keyboard interrupt.", file=sys.stderr)
-    mytimer.eltime_pr("training time: ")
+    if use_logging:
+        LOGGER.info("training time: " + mytimer.eltime_h())
+    else:
+        mytimer.eltime_pr("training time: ")
 
     # save final model+weights
     model.save(str(model_save_dir / 'weights.final.hd5'))
