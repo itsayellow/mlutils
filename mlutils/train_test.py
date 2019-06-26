@@ -63,7 +63,10 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
         initial_epoch = resume['initial_epoch']
         # epochs must be > initial_epoch
 
-    model.summary()
+    # print summary to log or print
+    summary_lines = []
+    model.summary(print_fn=lambda x: summary_lines.append(x))
+    log_or_print("\n".join(summary_lines), use_logging)
 
     # Housekeeping
     model_save_dir = model_out_dir / 'saved_models'
