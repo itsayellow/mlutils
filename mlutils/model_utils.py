@@ -319,17 +319,12 @@ def output_system_summary(use_logging=False):
     if tf is not None:
         log_or_print("Tensorflow version " + tf.__version__, use_logging)
 
-    log_or_print("Installed packages:", use_logging)
+    msg = "Installed packages:\n"
     installed_packages = pkg_resources.working_set
     inst_pkgs = {x.project_name:x.version for x in installed_packages}
     for inst_pkg in sorted(inst_pkgs):
-        log_or_print("    " + inst_pkg + "==" + inst_pkgs[inst_pkg], use_logging)
-
-    #print("-"*78)
-    #print("Arguments:")
-    #for arg in sys.argv:
-    #    print("    " + arg)
-    #print("")
+        msg += "    " + inst_pkg + "==" + inst_pkgs[inst_pkg] + "\n"
+    log_or_print(msg.rstrip(), use_logging)
 
 
 def return_also_modelname(func):
