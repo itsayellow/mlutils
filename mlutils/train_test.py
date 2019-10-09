@@ -8,8 +8,8 @@ import json
 import logging
 import sys
 
-from keras.models import load_model
-from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
+from tensorflow.keras.models import load_model
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard
 import numpy as np
 
 import tictoc
@@ -28,6 +28,18 @@ def log_or_print(msg, use_logging):
         LOGGER.info(msg)
     else:
         print(msg)
+
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super().default(obj)
 
 
 def training(model, epochs, train_x, train_y, val_x, val_y,
@@ -135,7 +147,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     # save history to json file
     if hist is not None:
         with history_save_file.open("w") as train_hist_fh:
-            json.dump(hist.history, train_hist_fh)
+            json.dump(hist.history, train_hist_fh, cls=NumpyEncoder)
 
     # turn off interactive and hold plots until user dismisses windows
     if realtime_plot:
@@ -166,7 +178,7 @@ def testing(model, test_x, test_y, model_out_dir, model_save_dir,
         model_save_dir (pathlib.Path):
     """
     # Load the model with the best validation loss
-    model.load_weights(model_save_dir / 'weights.best.hdf5')
+    model.load_weights(str(model_save_dir / 'weights.best.hdf5'))
 
     # get predictions
     predictions = model.predict(test_x)
@@ -202,4 +214,4 @@ def summarize(model, model_name, model_out_dir):
     info_out['datetime_utc'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     info_out_path = model_out_dir / 'info.json'
     with info_out_path.open("w") as info_out_fh:
-        json.dump(info_out, info_out_fh)
+        json.dump(info_out, info_out_fh, cls=NumpyEncoder)

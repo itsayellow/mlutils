@@ -18,8 +18,8 @@ try:
     import tensorflow as tf
 except:
     tf = None
-import keras.callbacks
-from keras.utils.generic_utils import serialize_keras_object
+import tensorflow.keras.callbacks
+from tensorflow.keras.utils import serialize_keras_object
 import numpy as np
 
 
@@ -39,7 +39,7 @@ def log_or_print(msg, use_logging):
 # TODO 20090515: this currently does not work properly.  Need to get imports
 #   working correctly so if we're not using it we do not import matplotlib
 #   but so that it actually does work if we are using it
-class MattPlotCallback(keras.callbacks.Callback):
+class MattPlotCallback(tensorflow.keras.callbacks.Callback):
     """Plot as training is ongoing
 
     DO NOT USE if you do not have matplotlib package installed.
@@ -115,7 +115,7 @@ class MattPlotCallback(keras.callbacks.Callback):
             plt.pause(0.001)
 
 
-class ModelCheckpointLogging(keras.callbacks.ModelCheckpoint):
+class ModelCheckpointLogging(tensorflow.keras.callbacks.ModelCheckpoint):
     """Mod of standard ModelCheckpoint to print to log instead of stdout
 
     See ../KerasMITLicense for license details concerning some code in this class
@@ -230,10 +230,10 @@ def get_model_full_config(model, remove_names=False):
     model_info = {}
     model_info['config'] = model_config
     model_info['loss'] = getattr(model, 'loss', "")
-    model_info['metrics'] = getattr(model, 'metrics', {})
+    model_info['metrics'] = [serialize_keras_object(x) for x in getattr(model, 'metrics', {})]
     model_info['optimizer'] = serialize_keras_object(
-            getattr(model, 'optimizer', {})
-            )
+        getattr(model, 'optimizer', {})
+    )
     #model_opt_name = my_model.optimizer.__class__.__module__ + \
     #        "." + my_model.optimizer.__class__.__name__
 
