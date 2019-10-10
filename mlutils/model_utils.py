@@ -9,7 +9,8 @@ import json
 import logging
 import pkg_resources
 import re
-#import pprint
+
+# import pprint
 import sys
 
 
@@ -29,6 +30,8 @@ import numpy as np
 #       to stderr
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
+
+
 def log_or_print(msg, use_logging):
     if use_logging:
         LOGGER.info(msg)
@@ -84,31 +87,31 @@ class MattPlotCallback(tensorflow.keras.callbacks.Callback):
             logs = {}
         self.epochs.append(epoch)
         if self.do_plot_acc:
-            if 'acc' in logs:
-                self.acc.append(logs['acc']*100)
-            if 'val_acc' in logs:
-                self.val_acc.append(logs['val_acc']*100)
+            if "acc" in logs:
+                self.acc.append(logs["acc"] * 100)
+            if "val_acc" in logs:
+                self.val_acc.append(logs["val_acc"] * 100)
             plot_vs_epoch(
-                    self.ax_acc,
-                    self.epochs[-2:],
-                    train=self.acc[-2:],
-                    val=self.val_acc[-2:],
-                    do_legend=not self.legend_printed_acc
-                    )
+                self.ax_acc,
+                self.epochs[-2:],
+                train=self.acc[-2:],
+                val=self.val_acc[-2:],
+                do_legend=not self.legend_printed_acc,
+            )
             if not self.legend_printed_acc:
                 self.legend_printed_acc = True
         if self.do_plot_loss:
-            if 'loss' in logs:
-                self.loss.append(logs['loss'])
-            if 'val_loss' in logs:
-                self.val_loss.append(logs['val_loss'])
+            if "loss" in logs:
+                self.loss.append(logs["loss"])
+            if "val_loss" in logs:
+                self.val_loss.append(logs["val_loss"])
             plot_vs_epoch(
-                    self.ax_loss,
-                    self.epochs[-2:],
-                    train=self.loss[-2:],
-                    val=self.val_loss[-2:],
-                    do_legend=not self.legend_printed_loss
-                    )
+                self.ax_loss,
+                self.epochs[-2:],
+                train=self.loss[-2:],
+                val=self.val_loss[-2:],
+                do_legend=not self.legend_printed_loss,
+            )
             if not self.legend_printed_loss:
                 self.legend_printed_loss = True
         if self.do_plot_loss or self.do_plot_acc:
@@ -125,8 +128,9 @@ class ModelCheckpointLogging(tensorflow.keras.callbacks.ModelCheckpoint):
         logger (logging.Logger): keyword arg only.  logger to print messages
             to instead of stdout
     """
+
     def __init__(self, *args, **kwargs):
-        self.logger = kwargs.pop('logger', None)
+        self.logger = kwargs.pop("logger", None)
         super().__init__(*args, **kwargs)
 
     def on_epoch_end(self, epoch, logs=None):
@@ -138,21 +142,29 @@ class ModelCheckpointLogging(tensorflow.keras.callbacks.ModelCheckpoint):
             if self.save_best_only:
                 current = logs.get(self.monitor)
                 if current is None:
-                    warnings.warn('Can save best model only with %s available, '
-                                  'skipping.' % (self.monitor), RuntimeWarning)
+                    warnings.warn(
+                        "Can save best model only with %s available, "
+                        "skipping." % (self.monitor),
+                        RuntimeWarning,
+                    )
                 else:
                     if self.monitor_op(current, self.best):
                         if self.verbose > 0:
                             msg = (
-                                    'Epoch %05d: %s improved from %0.5f to %0.5f,'
-                                    ' saving model to %s'
-                                    % (epoch + 1, self.monitor, self.best,
-                                        current, filepath)
-                                    )
+                                "Epoch %05d: %s improved from %0.5f to %0.5f,"
+                                " saving model to %s"
+                                % (
+                                    epoch + 1,
+                                    self.monitor,
+                                    self.best,
+                                    current,
+                                    filepath,
+                                )
+                            )
                             if self.logger is not None:
                                 self.logger.info(msg)
                             else:
-                                print('\n' + msg)
+                                print("\n" + msg)
                         self.best = current
                         if self.save_weights_only:
                             self.model.save_weights(filepath, overwrite=True)
@@ -160,21 +172,22 @@ class ModelCheckpointLogging(tensorflow.keras.callbacks.ModelCheckpoint):
                             self.model.save(filepath, overwrite=True)
                     else:
                         if self.verbose > 0:
-                            msg = (
-                                    'Epoch %05d: %s did not improve from %0.5f' %
-                                    (epoch + 1, self.monitor, self.best)
-                                    )
+                            msg = "Epoch %05d: %s did not improve from %0.5f" % (
+                                epoch + 1,
+                                self.monitor,
+                                self.best,
+                            )
                             if self.logger is not None:
                                 self.logger.info(msg)
                             else:
-                                print('\n' + msg)
+                                print("\n" + msg)
             else:
                 if self.verbose > 0:
-                    msg = 'Epoch %05d: saving model to %s' % (epoch + 1, filepath)
+                    msg = "Epoch %05d: saving model to %s" % (epoch + 1, filepath)
                     if self.logger is not None:
                         self.logger.info(msg)
                     else:
-                        print('\n' + msg)
+                        print("\n" + msg)
                 if self.save_weights_only:
                     self.model.save_weights(filepath, overwrite=True)
                 else:
@@ -188,11 +201,11 @@ def plot_acc(hist):
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Accuracy (%)")
     plot_vs_epoch(
-            ax,
-            range(1, len(hist.history['loss'])+1),
-            hist.history.get('acc', []),
-            hist.history.get('val_acc', [])
-            )
+        ax,
+        range(1, len(hist.history["loss"]) + 1),
+        hist.history.get("acc", []),
+        hist.history.get("val_acc", []),
+    )
 
 
 def get_model_full_config(model, remove_names=False):
@@ -204,37 +217,37 @@ def get_model_full_config(model, remove_names=False):
 
     if remove_names:
         # DEBUG only:
-        #pprint.pprint(model_config)
+        # pprint.pprint(model_config)
 
         # remove name from config and each layer, because name is arbitrary
         #   (for hashing)
         # this can be a bit brute-force, don't do this if you really need
         #   the config
-        model_config.pop('name', None)
+        model_config.pop("name", None)
         for layer in model_config["layers"]:
-            layer['config'].pop('name', None)
+            layer["config"].pop("name", None)
             # only in non-Sequential Models
-            layer.pop('name', None)
+            layer.pop("name", None)
             # only in non-Sequential Models
-            layer.pop('inbound_nodes', None)
+            layer.pop("inbound_nodes", None)
         # only in non-Sequential Models
-        for layer in model_config.get("input_layers",[]):
+        for layer in model_config.get("input_layers", []):
             layer.pop(0)
         # only in non-Sequential Models
-        for layer in model_config.get("output_layers",[]):
+        for layer in model_config.get("output_layers", []):
             layer.pop(0)
 
         # DEBUG only:
-        #pprint.pprint(model_config)
+        # pprint.pprint(model_config)
 
     model_info = {}
-    model_info['config'] = model_config
-    model_info['loss'] = getattr(model, 'loss', "")
-    model_info['metrics'] = [serialize_keras_object(x) for x in getattr(model, 'metrics', {})]
-    model_info['optimizer'] = serialize_keras_object(
-        getattr(model, 'optimizer', {})
-    )
-    #model_opt_name = my_model.optimizer.__class__.__module__ + \
+    model_info["config"] = model_config
+    model_info["loss"] = getattr(model, "loss", "")
+    model_info["metrics"] = [
+        serialize_keras_object(x) for x in getattr(model, "metrics", {})
+    ]
+    model_info["optimizer"] = serialize_keras_object(getattr(model, "optimizer", {}))
+    # model_opt_name = my_model.optimizer.__class__.__module__ + \
     #        "." + my_model.optimizer.__class__.__name__
 
     return model_info
@@ -267,10 +280,9 @@ def hash_model(model, hash_len=6):
     # remove name from each layer, because is arbitrary (don't use for hash)
     # sort_keys is important for hashing consistency!
     model_full_config_json = json.dumps(
-            get_model_full_config(model, remove_names=True),
-            sort_keys=True
-            )
-    model_hash = hashlib.md5(model_full_config_json.encode('utf8'))
+        get_model_full_config(model, remove_names=True), sort_keys=True
+    )
+    model_hash = hashlib.md5(model_full_config_json.encode("utf8"))
     return model_hash.hexdigest()[:hash_len]
 
 
@@ -282,34 +294,36 @@ def save_summary_to_file(model, model_summary_file, history=None):
         model_summary_file (str or pathlib.Path):
         history (keras.History.history or None):
     """
-    with open(str(model_summary_file), 'w') as summary_fh:
+    with open(str(model_summary_file), "w") as summary_fh:
         model.summary(print_fn=lambda x: print(x, file=summary_fh))
         try:
-            model_opt = serialize_keras_object(model.optimizer)['class_name']
+            model_opt = serialize_keras_object(model.optimizer)["class_name"]
         except AttributeError:
             model_opt = ""
         if model_opt != "":
             print("Optimization: " + model_opt, file=summary_fh)
-        print("Loss: " + getattr(model, 'loss', ""), file=summary_fh)
-        print("Metrics: " + str(getattr(model, 'metrics', [])), file=summary_fh)
+        print("Loss: " + getattr(model, "loss", ""), file=summary_fh)
+        print("Metrics: " + str(getattr(model, "metrics", [])), file=summary_fh)
 
         if history is not None:
-            print("-"*78, file=summary_fh)
-            print("Trained for {0} epochs.".format(len(history['loss'])), file=summary_fh)
-            if 'val_loss' in history:
+            print("-" * 78, file=summary_fh)
+            print(
+                "Trained for {0} epochs.".format(len(history["loss"])), file=summary_fh
+            )
+            if "val_loss" in history:
                 print(
-                        "Minimum validation loss={0:.4} at epoch {1}".format(
-                            np.min(history['val_loss']),
-                            np.argmin(history['val_loss'])
-                            ),
-                        file=summary_fh
-                        )
+                    "Minimum validation loss={0:.4} at epoch {1}".format(
+                        np.min(history["val_loss"]), np.argmin(history["val_loss"])
+                    ),
+                    file=summary_fh,
+                )
+
 
 def plot_vs_epoch(ax, epochs, train=None, val=None, do_legend=True):
     if train is not None:
-        ax.plot(epochs, train, 'ro-', label='training')
+        ax.plot(epochs, train, "ro-", label="training")
     if val is not None:
-        ax.plot(epochs, val, 'bo-', label='validation')
+        ax.plot(epochs, val, "bo-", label="validation")
     if do_legend:
         ax.legend()
 
@@ -321,7 +335,7 @@ def output_system_summary(use_logging=False):
 
     msg = "Installed packages:\n"
     installed_packages = pkg_resources.working_set
-    inst_pkgs = {x.project_name:x.version for x in installed_packages}
+    inst_pkgs = {x.project_name: x.version for x in installed_packages}
     for inst_pkg in sorted(inst_pkgs):
         msg += "    " + inst_pkg + "==" + inst_pkgs[inst_pkg] + "\n"
     log_or_print(msg.rstrip(), use_logging)
@@ -333,9 +347,11 @@ def return_also_modelname(func):
 
     Wrapped function returns (existing_return, model_name)
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         model = func(*args, **kwargs)
-        model_name = func.__name__ + '_' + hash_model(model, 6)
+        model_name = func.__name__ + "_" + hash_model(model, 6)
         return (model, model_name)
+
     return wrapper

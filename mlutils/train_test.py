@@ -23,6 +23,8 @@ import mlutils.model_utils
 #       to stderr
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
+
+
 def log_or_print(msg, use_logging):
     if use_logging:
         LOGGER.info(msg)
@@ -42,9 +44,21 @@ class NumpyEncoder(json.JSONEncoder):
             return super().default(obj)
 
 
-def training(model, epochs, train_x, train_y, val_x, val_y,
-        model_out_dir, train_verbose=1, patience=15, batch_size=20,
-        realtime_plot=False, resume=None, use_logging=False):
+def training(
+    model,
+    epochs,
+    train_x,
+    train_y,
+    val_x,
+    val_y,
+    model_out_dir,
+    train_verbose=1,
+    patience=15,
+    batch_size=20,
+    realtime_plot=False,
+    resume=None,
+    use_logging=False,
+):
     """
     Args:
         model (keras.model): model
@@ -69,10 +83,10 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     if resume is None:
         initial_epoch = 0
     else:
-        model = load_model(resume['model_weights_file'])
+        model = load_model(resume["model_weights_file"])
         # 'data_matt_model1_7f785f/saved_models/weights.final.hd5')
         # initial epoch is last epoch completed before
-        initial_epoch = resume['initial_epoch']
+        initial_epoch = resume["initial_epoch"]
         # epochs must be > initial_epoch
 
     # print summary to log or print
@@ -81,9 +95,9 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     log_or_print("\n".join(summary_lines), use_logging)
 
     # Housekeeping
-    model_save_dir = model_out_dir / 'saved_models'
-    history_save_file = model_out_dir / 'train_history.json'
-    model_summary_file = model_out_dir / 'model_summary.txt'
+    model_save_dir = model_out_dir / "saved_models"
+    history_save_file = model_out_dir / "train_history.json"
+    model_summary_file = model_out_dir / "model_summary.txt"
     # create master data dir and saved_models dir under it
     model_save_dir.mkdir(parents=True, exist_ok=True)
     # save summary to file first (in case we crash)
@@ -91,29 +105,28 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
 
     # Instantiate callbacks
     checkpointer = mlutils.model_utils.ModelCheckpointLogging(
-            filepath=str(model_save_dir / 'weights.best.hdf5'),
-            verbose=1, save_best_only=True,
-            logger=LOGGER if use_logging else None
-            )
+        filepath=str(model_save_dir / "weights.best.hdf5"),
+        verbose=1,
+        save_best_only=True,
+        logger=LOGGER if use_logging else None,
+    )
     checkpointer2 = ModelCheckpoint(
-            filepath=str(model_save_dir / 'weights.epoch{epoch:04d}.hdf5'),
-            verbose=0, period=20
-            )
-    early_stopping = EarlyStopping(
-            monitor='val_loss',
-            patience=patience
-            )
-    tensorboard_log_dir = model_out_dir / 'tensorboard'
+        filepath=str(model_save_dir / "weights.epoch{epoch:04d}.hdf5"),
+        verbose=0,
+        period=20,
+    )
+    early_stopping = EarlyStopping(monitor="val_loss", patience=patience)
+    tensorboard_log_dir = model_out_dir / "tensorboard"
     tensorboard_log_dir.mkdir(parents=True, exist_ok=True)
     tensorboard_callback = TensorBoard(
-            log_dir = str(tensorboard_log_dir),
-            histogram_freq=20,
-            batch_size=32,
-            write_graph=True,
-            write_grads=False,
-            write_images=False,
-            update_freq='epoch'
-            )
+        log_dir=str(tensorboard_log_dir),
+        histogram_freq=20,
+        batch_size=32,
+        write_graph=True,
+        write_grads=False,
+        write_images=False,
+        update_freq="epoch",
+    )
     callbacks = [checkpointer, checkpointer2, early_stopping, tensorboard_callback]
     if realtime_plot:
         mattplot_callback = mlutils.model_utils.MattPlotCallback()
@@ -126,14 +139,15 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
     # Train the model
     try:
         hist = model.fit(
-                train_x, train_y,
-                validation_data=(val_x, val_y),
-                epochs=epochs,
-                batch_size=batch_size,
-                callbacks=callbacks,
-                verbose=train_verbose,
-                initial_epoch=initial_epoch
-                )
+            train_x,
+            train_y,
+            validation_data=(val_x, val_y),
+            epochs=epochs,
+            batch_size=batch_size,
+            callbacks=callbacks,
+            verbose=train_verbose,
+            initial_epoch=initial_epoch,
+        )
     except KeyboardInterrupt:
         print("Stopped prematurely via keyboard interrupt.", file=sys.stderr)
     if use_logging:
@@ -142,7 +156,7 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
         mytimer.eltime_pr("training time: ")
 
     # save final model+weights
-    model.save(str(model_save_dir / 'weights.final.hd5'))
+    model.save(str(model_save_dir / "weights.final.hd5"))
 
     # save history to json file
     if hist is not None:
@@ -160,14 +174,13 @@ def training(model, epochs, train_x, train_y, val_x, val_y,
 
     # save summary to file with history this time
     mlutils.model_utils.save_summary_to_file(
-            model, model_summary_file, history=hist.history
-            )
+        model, model_summary_file, history=hist.history
+    )
 
     return model_save_dir
 
 
-def testing(model, test_x, test_y, model_out_dir, model_save_dir,
-        use_logging=False):
+def testing(model, test_x, test_y, model_out_dir, model_save_dir, use_logging=False):
     """Testing of experiment
 
     Args:
@@ -178,14 +191,14 @@ def testing(model, test_x, test_y, model_out_dir, model_save_dir,
         model_save_dir (pathlib.Path):
     """
     # Load the model with the best validation loss
-    model.load_weights(str(model_save_dir / 'weights.best.hdf5'))
+    model.load_weights(str(model_save_dir / "weights.best.hdf5"))
 
     # get predictions
     predictions = model.predict(test_x)
 
     # DEBUG
-    #print("predictions.shape="+str(predictions.shape))
-    #print("predictions[:20, 0]="+str(predictions[:20, 0]))
+    # print("predictions.shape="+str(predictions.shape))
+    # print("predictions[:20, 0]="+str(predictions[:20, 0]))
 
     # report test accuracy
     if predictions.shape[-1] > 1:
@@ -197,21 +210,21 @@ def testing(model, test_x, test_y, model_out_dir, model_save_dir,
         # binary output
         test_num_correct = np.sum((predictions > 0.5) == test_y)
 
-    test_accuracy = test_num_correct/predictions.shape[0]
+    test_accuracy = test_num_correct / predictions.shape[0]
     test_accuracy_perc = 100 * test_accuracy
-    log_or_print('Test accuracy: %.4f%%' % test_accuracy_perc, use_logging)
+    log_or_print("Test accuracy: %.4f%%" % test_accuracy_perc, use_logging)
 
-    test_out = {'test_acc': test_accuracy, 'test_acc_perc': test_accuracy_perc}
-    test_out_path = model_out_dir / 'test.json'
+    test_out = {"test_acc": test_accuracy, "test_acc_perc": test_accuracy_perc}
+    test_out_path = model_out_dir / "test.json"
     with test_out_path.open("w") as test_out_fh:
         json.dump(test_out, test_out_fh)
 
 
 def summarize(model, model_name, model_out_dir):
     info_out = {}
-    info_out['model_name'] = model_name
-    info_out['model_info'] = mlutils.model_utils.get_model_full_config(model)
-    info_out['datetime_utc'] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    info_out_path = model_out_dir / 'info.json'
+    info_out["model_name"] = model_name
+    info_out["model_info"] = mlutils.model_utils.get_model_full_config(model)
+    info_out["datetime_utc"] = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    info_out_path = model_out_dir / "info.json"
     with info_out_path.open("w") as info_out_fh:
         json.dump(info_out, info_out_fh, cls=NumpyEncoder)
