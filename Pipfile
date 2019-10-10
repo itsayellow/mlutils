@@ -15,4 +15,4 @@ matplotlib = "*"
 tictoc = {editable = true,git = "https://github.com/itsayellow/tictoc.git"}
 
 [requires]
-python_version = "3.5"
+python_version = "3.6"
