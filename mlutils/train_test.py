@@ -121,7 +121,7 @@ def training(
     tensorboard_callback = TensorBoard(
         log_dir=str(tensorboard_log_dir),
         histogram_freq=20,
-        batch_size=32,
+        batch_size=32, # not for Tensorflow 2.0
         write_graph=True,
         write_grads=False,
         write_images=False,
