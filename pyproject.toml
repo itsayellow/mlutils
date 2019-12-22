@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "mlutils.poe"
+version = "0.1.0"
+description = ""
+authors = ["Matthew Clapp <itsayellow+dev@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+tensorflow = "^2.0"
+numpy = "^1.18"
+matplotlib = "^3.1"
+tictoc = {editable = true,git = "https://github.com/itsayellow/tictoc.git"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylint = "^2.4"
+ptpython = "^2.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
