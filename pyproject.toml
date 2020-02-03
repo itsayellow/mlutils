@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mlutils"
-version = "0.3.0"
+version = "0.4.0"
 description="Utilities for training and using Machine Learning models."
 authors = ["Matthew Clapp <itsayellow+dev@gmail.com>"]
 homepage="https://github.com/itsayellow/mlutils"
@@ -10,7 +10,7 @@ packages=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 tensorflow = "^2.1"
 numpy = "^1.18"
 matplotlib = "^3.1"
