@@ -113,7 +113,7 @@ def training(
     checkpointer2 = ModelCheckpoint(
         filepath=str(model_save_dir / "weights.epoch{epoch:04d}.hdf5"),
         verbose=0,
-        period=20,
+        period=20, # deprecated in TF2.1: use save_freq instead
     )
     early_stopping = EarlyStopping(monitor="val_loss", patience=patience)
     tensorboard_log_dir = model_out_dir / "tensorboard"
@@ -121,7 +121,6 @@ def training(
     tensorboard_callback = TensorBoard(
         log_dir=str(tensorboard_log_dir),
         histogram_freq=20,
-        batch_size=32, # not for Tensorflow 2.0
         write_graph=True,
         write_grads=False,
         write_images=False,
