@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mlutils"
-version = "0.4.0"
+version = "0.4.1"
 description="Utilities for training and using Machine Learning models."
 authors = ["Matthew Clapp <itsayellow+dev@gmail.com>"]
 homepage="https://github.com/itsayellow/mlutils"
@@ -11,10 +11,17 @@ packages=[
 
 [tool.poetry.dependencies]
 python = "^3.6"
-tensorflow = "^2.1"
 numpy = "^1.18"
 matplotlib = "^3.1"
 #tictoc = {editable = true,git = "https://github.com/itsayellow/tictoc.git"}
+# pick a tensorflow to install
+tensorflow = {version = "^2.1", optional = true}
+tensorflow-gpu = {version = "^2.1", optional = true}
+
+# more user-friendly abbreviations
+[tool.poetry.extras]
+tf = ["tensorflow"]
+tfgpu = ["tensorflow-gpu"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
