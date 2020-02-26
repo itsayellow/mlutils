@@ -113,7 +113,7 @@ def training(
     checkpointer2 = ModelCheckpoint(
         filepath=str(model_save_dir / "weights.epoch{epoch:04d}.hdf5"),
         verbose=0,
-        period=20, # deprecated in TF2.1: use save_freq instead
+        period=20,  # deprecated in TF2.1: use save_freq instead
     )
     early_stopping = EarlyStopping(monitor="val_loss", patience=patience)
     tensorboard_log_dir = model_out_dir / "tensorboard"

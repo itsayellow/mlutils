@@ -40,7 +40,7 @@ def log_or_print(msg, use_logging):
         print(msg)
 
 
-# TODO 20090515: this currently does not work properly.  Need to get imports
+# TODO 20190515: this currently does not work properly.  Need to get imports
 #   working correctly so if we're not using it we do not import matplotlib
 #   but so that it actually does work if we are using it
 class MattPlotCallback(tensorflow.keras.callbacks.Callback):
