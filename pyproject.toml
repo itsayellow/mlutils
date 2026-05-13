@@ -24,7 +24,7 @@ tf = ["tensorflow"]
 tfgpu = ["tensorflow-gpu"]
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^9.0.3"
 pylint = "^2.4"
 ptpython = "^2.0"
 
